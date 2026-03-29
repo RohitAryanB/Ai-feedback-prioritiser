@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CivicPulse — AI Community Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #060b10;
+  --surface: #0d1620;
+  --surface2: #121e2b;
+  --surface3: #172433;
+  --border: #1c2e3d;
+  --border2: #243c50;
+  --text: #e4eef5;
+  --text2: #8ca8be;
+  --text3: #3d6070;
+  --accent: #00d4a8;
+  --accent2: #0ea5e9;
+  --warn: #f59e0b;
+  --danger: #f43f5e;
+  --purple: #a78bfa;
+  --green: #34d399;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(0,212,168,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,168,.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events:none; z-index:0;
+}
+
+/* ── LAYOUT ── */
+.app { display:flex; min-height:100vh; position:relative; z-index:1; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width:220px; flex-shrink:0;
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column;
+  position:sticky; top:0; height:100vh;
+}
+.logo {
+  padding:22px 18px 18px;
+  border-bottom:1px solid var(--border);
+}
+.logo-row { display:flex; align-items:center; gap:9px; }
+.logo-gem {
+  width:32px; height:32px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:9px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:15px;
+  box-shadow:0 0 18px rgba(0,212,168,.35);
+}
+.logo-name { font-family:'Syne',sans-serif; font-weight:800; font-size:17px; letter-spacing:-.3px; }
+.logo-tag { font-family:'JetBrains Mono',monospace; font-size:9.5px; color:var(--text3); text-transform:uppercase; letter-spacing:.8px; margin-top:4px; padding-left:41px; }
+.nav { flex:1; padding:14px 0; overflow-y:auto; }
+.nl { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--text3); text-transform:uppercase; letter-spacing:1.5px; padding:8px 18px 3px; }
+.ni {
+  display:flex; align-items:center; gap:9px;
+  padding:8px 18px; font-size:13px; color:var(--text2);
+  cursor:pointer; transition:.15s; border-left:2px solid transparent;
+}
+.ni:hover { background:var(--surface2); color:var(--text); }
+.ni.active { background:rgba(0,212,168,.08); color:var(--accent); border-left-color:var(--accent); font-weight:500; }
+.ni-ic { font-size:14px; width:16px; text-align:center; }
+.ni-badge {
+  margin-left:auto; font-family:'JetBrains Mono',monospace;
+  font-size:10px; padding:1px 6px; border-radius:10px; font-weight:600;
+}
+.badge-red { background:rgba(244,63,94,.2); color:var(--danger); }
+.badge-green { background:rgba(0,212,168,.15); color:var(--accent); }
+.sf { padding:14px 18px; border-top:1px solid var(--border); }
+.av { display:flex; align-items:center; gap:9px; }
+.av-circle {
+  width:30px; height:30px; border-radius:50%;
+  background:linear-gradient(135deg,#6366f1,#0ea5e9);
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:700; flex-shrink:0;
+}
+.av-name { font-size:12.5px; font-weight:500; }
+.av-role { font-size:10.5px; color:var(--text3); }
+
+/* ── MAIN ── */
+.main { flex:1; display:flex; flex-direction:column; min-width:0; }
+.topbar {
+  height:54px; background:rgba(6,11,16,.8);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:14px;
+  padding:0 26px; position:sticky; top:0; z-index:50;
+}
+.topbar-title { font-family:'Syne',sans-serif; font-weight:700; font-size:16px; flex:1; }
+.live-pill {
+  display:flex; align-items:center; gap:6px;
+  font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text3);
+}
+.dot { width:7px; height:7px; border-radius:50%; background:var(--accent); animation:blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,212,168,.5)} 50%{opacity:.6;box-shadow:0 0 0 4px rgba(0,212,168,0)} }
+.btn { padding:7px 14px; border-radius:6px; font-size:12.5px; font-weight:500; cursor:pointer; border:none; transition:.15s; font-family:'DM Sans',sans-serif; }
+.btn-ghost { background:transparent; border:1px solid var(--border2); color:var(--text2); }
+.btn-ghost:hover { color:var(--text); border-color:var(--text3); }
+.btn-primary { background:var(--accent); color:var(--bg); font-weight:700; }
+.btn-primary:hover { filter:brightness(1.1); }
+.btn-danger { background:rgba(244,63,94,.15); color:var(--danger); border:1px solid rgba(244,63,94,.25); }
+
+/* ── VIEWS ── */
+.view { display:none; padding:24px 26px; }
+.view.active { display:block; }
+
+/* ── INTAKE FORM ── */
+.intake-wrap {
+  max-width:720px; margin:0 auto;
+}
+.intake-hero {
+  text-align:center; margin-bottom:32px;
+}
+.intake-hero h1 { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; margin-bottom:8px; }
+.intake-hero p { color:var(--text2); font-size:15px; line-height:1.6; }
+.intake-hero .hl { color:var(--accent); }
+
+.form-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+}
+.form-tabs {
+  display:flex;
+  border-bottom:1px solid var(--border);
+}
+.ftab {
+  flex:1; padding:14px; text-align:center;
+  font-size:13px; font-weight:500; cursor:pointer;
+  color:var(--text3); transition:.15s;
+  border-bottom:2px solid transparent;
+}
+.ftab:hover { color:var(--text2); background:var(--surface2); }
+.ftab.active { color:var(--accent); border-bottom-color:var(--accent); background:rgba(0,212,168,.04); }
+
+.form-body { padding:28px; }
+.field { margin-bottom:20px; }
+.field label {
+  display:block; font-size:12px; font-weight:500;
+  color:var(--text3); text-transform:uppercase;
+  letter-spacing:.6px; margin-bottom:7px;
+  font-family:'JetBrains Mono',monospace;
+}
+.field input, .field select, .field textarea {
+  width:100%; background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:8px; padding:11px 14px;
+  color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px;
+  transition:.2s; outline:none;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color:var(--accent); box-shadow:0 0 0 3px rgba(0,212,168,.1);
+}
+.field textarea { resize:vertical; min-height:120px; line-height:1.6; }
+.field select option { background:var(--surface2); }
+.field-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.char-count { font-size:11px; color:var(--text3); text-align:right; margin-top:4px; font-family:'JetBrains Mono',monospace; }
+
+.severity-selector { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.sev-opt {
+  padding:10px 8px; border-radius:8px; text-align:center;
+  cursor:pointer; border:1px solid var(--border);
+  transition:.15s; font-size:12px;
+}
+.sev-opt:hover { border-color:var(--border2); }
+.sev-opt.selected { border-width:2px; }
+.sev-opt .sev-icon { font-size:18px; margin-bottom:4px; }
+.sev-opt .sev-lbl { font-weight:500; font-size:11.5px; }
+.sev-low { color:#34d399; }
+.sev-med { color:var(--accent2); }
+.sev-high { color:var(--warn); }
+.sev-critical { color:var(--danger); }
+.sev-opt.selected.sev-low { background:rgba(52,211,153,.08); border-color:#34d399; }
+.sev-opt.selected.sev-med { background:rgba(14,165,233,.08); border-color:var(--accent2); }
+.sev-opt.selected.sev-high { background:rgba(245,158,11,.08); border-color:var(--warn); }
+.sev-opt.selected.sev-critical { background:rgba(244,63,94,.08); border-color:var(--danger); }
+
+.submit-row { display:flex; align-items:center; gap:12px; margin-top:8px; }
+.submit-note { font-size:12px; color:var(--text3); flex:1; }
+.btn-submit {
+  padding:12px 28px; background:var(--accent); color:var(--bg);
+  font-weight:700; font-size:14px; border-radius:8px;
+  border:none; cursor:pointer; transition:.15s;
+  font-family:'Syne',sans-serif;
+  display:flex; align-items:center; gap:8px;
+}
+.btn-submit:hover { filter:brightness(1.12); transform:translateY(-1px); }
+.btn-submit:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+/* ── AI PROCESSING OVERLAY ── */
+.ai-processing {
+  display:none;
+  background:rgba(0,212,168,.04);
+  border:1px solid rgba(0,212,168,.2);
+  border-radius:10px;
+  padding:20px;
+  margin-top:16px;
+}
+.ai-processing.show { display:block; animation:fadeIn .3s; }
+.ai-proc-header { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+.ai-proc-title { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent); text-transform:uppercase; letter-spacing:.5px; }
+.ai-steps { display:flex; flex-direction:column; gap:8px; }
+.ai-step {
+  display:flex; align-items:center; gap:10px;
+  font-size:13px; color:var(--text2);
+}
+.step-ic { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; }
+.step-pending { background:var(--surface3); color:var(--text3); }
+.step-running { background:rgba(0,212,168,.15); color:var(--accent); animation:spin .8s linear infinite; }
+.step-done { background:rgba(0,212,168,.15); color:var(--accent); }
+@keyframes spin { to { transform:rotate(360deg); } }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+/* ── SUCCESS CARD ── */
+.success-card {
+  display:none;
+  background:var(--surface);
+  border:1px solid rgba(0,212,168,.25);
+  border-radius:14px;
+  padding:32px;
+  text-align:center;
+  margin-top:16px;
+}
+.success-card.show { display:block; animation:fadeIn .4s; }
+.success-icon { font-size:48px; margin-bottom:16px; }
+.success-id { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--accent); margin-bottom:8px; }
+.success-title { font-family:'Syne',sans-serif; font-size:20px; font-weight:700; margin-bottom:8px; }
+.success-body { color:var(--text2); font-size:14px; line-height:1.6; margin-bottom:20px; }
+.ai-outcome-box {
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:18px;
+  text-align:left;
+  margin-bottom:20px;
+}
+.aob-label { font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--accent); text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+.aob-content { font-size:13.5px; line-height:1.7; color:var(--text2); }
+.aob-content strong { color:var(--text); }
+.outcome-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+.ot { font-size:11px; padding:3px 10px; border-radius:12px; font-family:'JetBrains Mono',monospace; font-weight:500; }
+.ot-cat { background:rgba(14,165,233,.12); color:var(--accent2); }
+.ot-sev { background:rgba(245,158,11,.12); color:var(--warn); }
+.ot-dept { background:rgba(167,139,250,.12); color:var(--purple); }
+.ot-pri { background:rgba(244,63,94,.12); color:var(--danger); }
+
+/* ── DASHBOARD ── */
+.stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px; }
+.sc {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:11px; padding:16px 18px; position:relative; overflow:hidden;
+}
+.sc::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+.sc.a::before { background:linear-gradient(90deg,var(--accent),transparent); }
+.sc.b::before { background:linear-gradient(90deg,var(--accent2),transparent); }
+.sc.c::before { background:linear-gradient(90deg,var(--warn),transparent); }
+.sc.d::before { background:linear-gradient(90deg,var(--danger),transparent); }
+.sc-label { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
+.sc-val { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; line-height:1; margin-bottom:6px; }
+.sc-sub { font-size:12px; color:var(--text3); }
+.sc-icon { position:absolute; top:14px; right:14px; font-size:20px; opacity:.2; }
+
+.dash-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+.ch { padding:14px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
+.ct { font-family:'Syne',sans-serif; font-weight:700; font-size:13.5px; flex:1; }
+.cm { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text3); }
+.cb { padding:18px; }
+
+/* complaint rows */
+.complaint-list { display:flex; flex-direction:column; }
+.cl-item {
+  padding:13px 18px; border-bottom:1px solid var(--border);
+  cursor:pointer; transition:.15s;
+  display:grid; grid-template-columns:auto 1fr auto;
+  gap:12px; align-items:start;
+}
+.cl-item:last-child { border-bottom:none; }
+.cl-item:hover { background:var(--surface2); }
+.cl-rank { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text3); padding-top:2px; }
+.cl-body { min-width:0; }
+.cl-title { font-size:13.5px; font-weight:500; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cl-meta { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.cl-time { font-size:11px; color:var(--text3); font-family:'JetBrains Mono',monospace; }
+.cl-loc { font-size:11.5px; color:var(--text3); }
+.cl-right { display:flex; flex-direction:column; align-items:flex-end; gap:5px; }
+.pill {
+  font-size:10px; padding:2px 8px; border-radius:10px;
+  font-family:'JetBrains Mono',monospace; font-weight:600; white-space:nowrap;
+}
+.pill-new { background:rgba(244,63,94,.12); color:var(--danger); }
+.pill-review { background:rgba(245,158,11,.12); color:var(--warn); }
+.pill-action { background:rgba(0,212,168,.12); color:var(--accent); }
+.pill-resolved { background:rgba(52,211,153,.12); color:var(--green); }
+.sev-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+.sd-low { background:#34d399; }
+.sd-medium { background:var(--accent2); }
+.sd-high { background:var(--warn); }
+.sd-critical { background:var(--danger); box-shadow:0 0 6px rgba(244,63,94,.5); }
+
+/* category tag */
+.ctag { font-size:10px; padding:2px 7px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-weight:500; }
+.ctag-infra { background:rgba(14,165,233,.1); color:var(--accent2); }
+.ctag-env { background:rgba(0,212,168,.1); color:var(--accent); }
+.ctag-health { background:rgba(245,158,11,.1); color:var(--warn); }
+.ctag-safety { background:rgba(244,63,94,.1); color:var(--danger); }
+.ctag-social { background:rgba(167,139,250,.1); color:var(--purple); }
+.ctag-other { background:rgba(255,255,255,.06); color:var(--text3); }
+
+/* AI insight box */
+.insight-box {
+  margin:14px 18px;
+  padding:14px 16px;
+  background:rgba(0,212,168,.05);
+  border-left:3px solid var(--accent);
+  border-radius:0 8px 8px 0;
+}
+.ib-header { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--accent); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; display:flex; align-items:center; gap:5px; }
+.ib-text { font-size:13px; color:var(--text2); line-height:1.6; }
+.ib-text strong { color:var(--text); }
+
+/* bar chart */
+.bar-chart { display:flex; flex-direction:column; gap:10px; }
+.bc-row { display:flex; align-items:center; gap:10px; }
+.bc-label { font-size:12px; color:var(--text2); width:110px; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.bc-bar-wrap { flex:1; height:6px; background:var(--surface3); border-radius:3px; overflow:hidden; }
+.bc-bar { height:100%; border-radius:3px; transition:width 1s ease; }
+.bc-val { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text3); width:40px; text-align:right; }
+
+/* donut */
+.donut-row { display:flex; align-items:center; gap:20px; }
+.dleg { flex:1; display:flex; flex-direction:column; gap:7px; }
+.dli { display:flex; align-items:center; gap:8px; font-size:12.5px; }
+.dld { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.dll { flex:1; color:var(--text2); }
+.dlv { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text3); }
+
+/* empty state */
+.empty-state { padding:48px 24px; text-align:center; }
+.es-icon { font-size:40px; margin-bottom:12px; opacity:.4; }
+.es-title { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; margin-bottom:6px; color:var(--text2); }
+.es-body { font-size:13px; color:var(--text3); }
+
+/* notification toast */
+.toast {
+  position:fixed; bottom:24px; right:24px;
+  background:var(--surface);
+  border:1px solid var(--accent);
+  border-radius:10px;
+  padding:14px 18px;
+  display:flex; align-items:center; gap:10px;
+  font-size:13.5px;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+  z-index:200;
+  transform:translateY(80px); opacity:0;
+  transition:.35s cubic-bezier(.34,1.56,.64,1);
+  max-width:340px;
+}
+.toast.show { transform:none; opacity:1; }
+.toast-ic { font-size:18px; }
+
+/* track view */
+.track-wrap { max-width:640px; margin:0 auto; }
+.track-field { display:flex; gap:10px; margin-bottom:24px; }
+.track-field input { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:11px 14px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; outline:none; transition:.2s; }
+.track-field input:focus { border-color:var(--accent); }
+.complaint-detail {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:12px; overflow:hidden; display:none;
+}
+.complaint-detail.show { display:block; animation:fadeIn .3s; }
+.cd-header { padding:20px; border-bottom:1px solid var(--border); display:flex; align-items:flex-start; gap:14px; }
+.cd-status-circle { width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+.cd-title { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; margin-bottom:4px; }
+.cd-id { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text3); }
+.cd-body { padding:20px; display:flex; flex-direction:column; gap:16px; }
+.cd-field { display:flex; flex-direction:column; gap:4px; }
+.cd-field-label { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:.5px; }
+.cd-field-val { font-size:13.5px; line-height:1.6; color:var(--text2); }
+.timeline { display:flex; flex-direction:column; gap:0; }
+.tl-item { display:flex; gap:14px; padding-bottom:16px; position:relative; }
+.tl-item::before { content:''; position:absolute; left:11px; top:24px; bottom:0; width:1px; background:var(--border); }
+.tl-item:last-child::before { display:none; }
+.tl-dot { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; z-index:1; }
+.tl-content { flex:1; }
+.tl-title { font-size:13px; font-weight:500; margin-bottom:2px; }
+.tl-time { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text3); }
+
+@media(max-width:900px) {
+  .stats-grid { grid-template-columns:1fr 1fr; }
+  .dash-grid { grid-template-columns:1fr; }
+  .field-row { grid-template-columns:1fr; }
+  .sidebar { display:none; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-row">
+      <div class="logo-gem">🔬</div>
+      <span class="logo-name">CivicPulse</span>
+    </div>
+    <div class="logo-tag">AI Community Intelligence</div>
+  </div>
+  <nav class="nav">
+    <div class="nl">Citizen</div>
+    <div class="ni" onclick="showView('submit')"><span class="ni-ic">📝</span> Submit Issue</div>
+    <div class="ni" onclick="showView('track')"><span class="ni-ic">🔍</span> Track My Issue</div>
+    <div class="nl">Government</div>
+    <div class="ni active" onclick="showView('dashboard')"><span class="ni-ic">📊</span> Dashboard</div>
+    <div class="ni" onclick="showView('issues')"><span class="ni-ic">📋</span> All Issues <span class="ni-badge badge-red" id="issueCount">0</span></div>
+    <div class="ni" onclick="showView('insights')"><span class="ni-ic">🧠</span> AI Insights</div>
+    <div class="nl">Platform</div>
+    <div class="ni" onclick="showView('submit')"><span class="ni-ic">⚙️</span> Settings</div>
+  </nav>
+  <div class="sf">
+    <div class="av">
+      <div class="av-circle">RK</div>
+      <div>
+        <div class="av-name">Ravi Kumar</div>
+        <div class="av-role">Municipal Officer</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-title" id="viewTitle">Dashboard</div>
+    <div class="live-pill"><div class="dot"></div> Live · AI-Powered</div>
+    <button class="btn btn-ghost" onclick="showView('submit')">＋ New Report</button>
+    <button class="btn btn-primary" onclick="showView('dashboard')">📊 Dashboard</button>
+  </div>
+
+  <!-- ════════════════════════ SUBMIT VIEW ════════════════════════ -->
+  <div class="view active" id="view-submit">
+    <div class="intake-wrap">
+      <div class="intake-hero">
+        <h1>Report a Community Issue</h1>
+        <p>Your voice matters. Submit a <span class="hl">complaint</span> or <span class="hl">suggestion</span> and our AI will analyze it, categorize it, and route it to the right authorities — instantly.</p>
+      </div>
+
+      <div class="form-card">
+        <div class="form-tabs">
+          <div class="ftab active" onclick="switchFormTab(this,'complaint')">🚨 Complaint</div>
+          <div class="ftab" onclick="switchFormTab(this,'suggestion')">💡 Suggestion</div>
+          <div class="ftab" onclick="switchFormTab(this,'feedback')">📣 General Feedback</div>
+        </div>
+        <div class="form-body">
+          <div class="field-row">
+            <div class="field">
+              <label>Your Name</label>
+              <input type="text" id="f-name" placeholder="e.g. Priya Sharma">
+            </div>
+            <div class="field">
+              <label>Contact (optional)</label>
+              <input type="text" id="f-contact" placeholder="Phone or email">
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Ward / Area</label>
+              <input type="text" id="f-area" placeholder="e.g. Ward 7, Banjara Hills">
+            </div>
+            <div class="field">
+              <label>Category</label>
+              <select id="f-category">
+                <option value="">— Select —</option>
+                <option value="infrastructure">🏗️ Infrastructure & Roads</option>
+                <option value="environment">🌿 Environment & Sanitation</option>
+                <option value="health">🏥 Health & Safety</option>
+                <option value="water">💧 Water & Drainage</option>
+                <option value="electricity">⚡ Electricity & Street Lights</option>
+                <option value="social">🤝 Social Services</option>
+                <option value="governance">🏛️ Governance & Administration</option>
+                <option value="other">📌 Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Subject</label>
+            <input type="text" id="f-subject" placeholder="Brief title of the issue..." maxlength="120">
+          </div>
+
+          <div class="field">
+            <label>Describe the issue in detail</label>
+            <textarea id="f-description" placeholder="Describe what you observed, when it happened, how it affects you and the community, and any relevant context..." maxlength="1000" oninput="updateCount(this,'f-count')"></textarea>
+            <div class="char-count"><span id="f-count">0</span>/1000</div>
+          </div>
+
+          <div class="field">
+            <label>Perceived Severity</label>
+            <div class="severity-selector">
+              <div class="sev-opt sev-low" onclick="selectSev(this,'low')">
+                <div class="sev-icon">🟢</div>
+                <div class="sev-lbl">Low</div>
+                <div style="font-size:10px;color:var(--text3);margin-top:2px;">Minor inconvenience</div>
+              </div>
+              <div class="sev-opt sev-med" onclick="selectSev(this,'medium')">
+                <div class="sev-icon">🔵</div>
+                <div class="sev-lbl">Medium</div>
+                <div style="font-size:10px;color:var(--text3);margin-top:2px;">Needs attention</div>
+              </div>
+              <div class="sev-opt sev-high" onclick="selectSev(this,'high')">
+                <div class="sev-icon">🟠</div>
+                <div class="sev-lbl">High</div>
+                <div style="font-size:10px;color:var(--text3);margin-top:2px;">Urgent action needed</div>
+              </div>
+              <div class="sev-opt sev-critical" onclick="selectSev(this,'critical')">
+                <div class="sev-icon">🔴</div>
+                <div class="sev-lbl">Critical</div>
+                <div style="font-size:10px;color:var(--text3);margin-top:2px;">Immediate risk</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="submit-row">
+            <div class="submit-note">🔒 Your submission is secure and will be reviewed by the civic team within 48h.</div>
+            <button class="btn-submit" id="submitBtn" onclick="submitComplaint()">
+              <span>Submit to AI</span> <span>⚡</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Processing -->
+      <div class="ai-processing" id="aiProcessing">
+        <div class="ai-proc-header">
+          <span style="font-size:16px;">🤖</span>
+          <div class="ai-proc-title">AI Processing Your Submission</div>
+        </div>
+        <div class="ai-steps" id="aiSteps">
+          <div class="ai-step"><div class="step-ic step-pending" id="step0">○</div> Ingesting submission data...</div>
+          <div class="ai-step"><div class="step-ic step-pending" id="step1">○</div> Running NLP analysis &amp; keyword extraction...</div>
+          <div class="ai-step"><div class="step-ic step-pending" id="step2">○</div> Categorizing issue &amp; assessing severity...</div>
+          <div class="ai-step"><div class="step-ic step-pending" id="step3">○</div> Checking similar complaints in database...</div>
+          <div class="ai-step"><div class="step-ic step-pending" id="step4">○</div> Generating action recommendation...</div>
+          <div class="ai-step"><div class="step-ic step-pending" id="step5">○</div> Storing to civic database &amp; assigning ticket...</div>
+        </div>
+      </div>
+
+      <!-- Success -->
+      <div class="success-card" id="successCard">
+        <div class="success-icon">✅</div>
+        <div class="success-id" id="successId">TICKET #CP-0000</div>
+        <div class="success-title">Issue Received &amp; Analyzed!</div>
+        <div class="success-body">Your report has been processed by our AI, stored in the civic database, and routed to the relevant department. Track your issue using the ticket ID above.</div>
+        <div class="ai-outcome-box">
+          <div class="aob-label">🤖 AI Analysis Outcome</div>
+          <div class="aob-content" id="aiOutcomeText">Loading analysis...</div>
+          <div class="outcome-tags" id="outcomeTags"></div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="showView('track')">🔍 Track This Issue</button>
+          <button class="btn btn-ghost" onclick="resetForm()">Submit Another</button>
+          <button class="btn btn-ghost" onclick="showView('dashboard')">📊 View Dashboard</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════ DASHBOARD VIEW ════════════════════════ -->
+  <div class="view" id="view-dashboard">
+    <div class="stats-grid" id="statsGrid">
+      <div class="sc a"><div class="sc-label">Total Submissions</div><div class="sc-val" id="statTotal">0</div><div class="sc-sub">All time</div><div class="sc-icon">📬</div></div>
+      <div class="sc b"><div class="sc-label">Pending Review</div><div class="sc-val" id="statPending">0</div><div class="sc-sub">Awaiting action</div><div class="sc-icon">⏳</div></div>
+      <div class="sc c"><div class="sc-label">Critical Issues</div><div class="sc-val" id="statCritical">0</div><div class="sc-sub">Need immediate action</div><div class="sc-icon">🚨</div></div>
+      <div class="sc d"><div class="sc-label">Resolved</div><div class="sc-val" id="statResolved">0</div><div class="sc-sub">Closed issues</div><div class="sc-icon">✅</div></div>
+    </div>
+
+    <div class="dash-grid">
+      <!-- Recent submissions -->
+      <div class="card">
+        <div class="ch"><div class="ct">🕐 Recent Submissions</div><div class="cm" id="recentCount">0 total</div></div>
+        <div class="complaint-list" id="recentList">
+          <div class="empty-state"><div class="es-icon">📭</div><div class="es-title">No submissions yet</div><div class="es-body">Be the first to report a community issue.</div></div>
+        </div>
+      </div>
+
+      <!-- Category breakdown -->
+      <div class="card">
+        <div class="ch"><div class="ct">📊 Issues by Category</div></div>
+        <div class="cb" id="categoryChart">
+          <div class="empty-state" style="padding:32px 16px;"><div class="es-icon">📊</div><div class="es-title">No data yet</div><div class="es-body">Submit issues to see category breakdown.</div></div>
+        </div>
+
+        <div class="ch" style="border-top:1px solid var(--border);"><div class="ct">🏆 Top Reported Areas</div></div>
+        <div class="cb" id="areaChart">
+          <div class="empty-state" style="padding:24px 16px;"><div class="es-icon">🗺️</div><div class="es-title">No area data</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI insight -->
+    <div class="card" id="dashInsightCard" style="display:none;">
+      <div class="ch"><div class="ct">🧠 AI Platform Insight</div><div class="live-pill"><div class="dot"></div>Auto-generated</div></div>
+      <div class="insight-box" id="dashInsightText"></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════ ALL ISSUES VIEW ════════════════════════ -->
+  <div class="view" id="view-issues">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+      <input type="text" id="searchInput" onInput="filterIssues()" placeholder="🔍  Search issues by keyword, area, category..." style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13.5px;outline:none;">
+      <select id="filterSev" onchange="filterIssues()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+        <option value="">All Severities</option>
+        <option value="critical">Critical</option>
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+      <select id="filterCat" onchange="filterIssues()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+        <option value="">All Categories</option>
+        <option value="infrastructure">Infrastructure</option>
+        <option value="environment">Environment</option>
+        <option value="health">Health</option>
+        <option value="water">Water</option>
+        <option value="electricity">Electricity</option>
+        <option value="social">Social</option>
+        <option value="governance">Governance</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct">📋 All Submissions</div><div class="cm" id="allIssuesMeta"></div></div>
+      <div class="complaint-list" id="allIssuesList">
+        <div class="empty-state"><div class="es-icon">📭</div><div class="es-title">No submissions yet</div><div class="es-body">Submit a complaint to see it here.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════ TRACK VIEW ════════════════════════ -->
+  <div class="view" id="view-track">
+    <div class="track-wrap">
+      <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:6px;">Track Your Issue</h2>
+      <p style="color:var(--text2);font-size:14px;margin-bottom:22px;">Enter your ticket ID to see the current status, AI analysis, and timeline.</p>
+      <div class="track-field">
+        <input type="text" id="trackInput" placeholder="Enter ticket ID  e.g. CP-2024-0001" style="text-transform:uppercase;">
+        <button class="btn btn-primary" onclick="trackIssue()">Track →</button>
+      </div>
+      <div class="complaint-detail" id="trackDetail"></div>
+      <div style="margin-top:24px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px;">📋 Your Recent Submissions</div>
+        <div class="card">
+          <div class="complaint-list" id="myIssuesList">
+            <div class="empty-state"><div class="es-icon">📭</div><div class="es-title">No issues found</div><div class="es-body">Submit a complaint first.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════ INSIGHTS VIEW ════════════════════════ -->
+  <div class="view" id="view-insights">
+    <div class="card" style="margin-bottom:14px;">
+      <div class="ch"><div class="ct">🤖 AI-Generated Community Intelligence Report</div><div class="live-pill"><div class="dot"></div>Real-time</div></div>
+      <div id="insightsContent" style="padding:24px;">
+        <div class="empty-state"><div class="es-icon">🧠</div><div class="es-title">Not enough data yet</div><div class="es-body">Submit at least 3 issues to generate AI insights.</div></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-ic" id="toastIc">✅</span>
+  <span id="toastMsg">Done!</span>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  STORAGE HELPERS (persistent via window.storage)
+// ══════════════════════════════════════════════
+const STORAGE_KEY = 'civicpulse-complaints';
+
+async function loadComplaints() {
+  try {
+    const r = await window.storage.get(STORAGE_KEY);
+    return r ? JSON.parse(r.value) : [];
+  } catch { return []; }
+}
+
+async function saveComplaints(list) {
+  try {
+    await window.storage.set(STORAGE_KEY, JSON.stringify(list));
+  } catch(e) { console.error('Storage error', e); }
+}
+
+// ══════════════════════════════════════════════
+//  APP STATE
+// ══════════════════════════════════════════════
+let complaints = [];
+let selectedSeverity = '';
+let formType = 'complaint';
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+(async () => {
+  complaints = await loadComplaints();
+  refreshAll();
+})();
+
+// ══════════════════════════════════════════════
+//  VIEW ROUTING
+// ══════════════════════════════════════════════
+const viewTitles = {
+  submit:'Submit a Report', dashboard:'Dashboard',
+  issues:'All Issues', track:'Track My Issue', insights:'AI Insights'
+};
+
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.getElementById('viewTitle').textContent = viewTitles[name] || name;
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n => {
+    if(n.textContent.toLowerCase().includes(name.substring(0,5))) n.classList.add('active');
+  });
+  if(name==='dashboard') renderDashboard();
+  if(name==='issues') renderAllIssues();
+  if(name==='track') renderMyIssues();
+  if(name==='insights') renderInsights();
+}
+
+// ══════════════════════════════════════════════
+//  FORM HELPERS
+// ══════════════════════════════════════════════
+function switchFormTab(el, type) {
+  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  formType = type;
+}
+
+function updateCount(el, countId) {
+  document.getElementById(countId).textContent = el.value.length;
+}
+
+function selectSev(el, val) {
+  document.querySelectorAll('.sev-opt').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedSeverity = val;
+}
+
+// ══════════════════════════════════════════════
+//  SUBMIT COMPLAINT
+// ══════════════════════════════════════════════
+async function submitComplaint() {
+  const name = document.getElementById('f-name').value.trim();
+  const area = document.getElementById('f-area').value.trim();
+  const subject = document.getElementById('f-subject').value.trim();
+  const description = document.getElementById('f-description').value.trim();
+  const category = document.getElementById('f-category').value;
+
+  if (!subject || !description || !area) {
+    showToast('⚠️', 'Please fill in Subject, Area, and Description.');
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+
+  // Show AI processing
+  const proc = document.getElementById('aiProcessing');
+  proc.classList.add('show');
+  document.getElementById('successCard').classList.remove('show');
+
+  // Animate steps
+  await animateSteps();
+
+  // Call AI for analysis
+  const aiResult = await analyzeWithAI(subject, description, category, selectedSeverity, formType, area);
+
+  // Generate ticket ID
+  const ticketId = 'CP-' + new Date().getFullYear() + '-' + String(complaints.length + 1).padStart(4,'0');
+
+  // Build record
+  const record = {
+    id: ticketId,
+    type: formType,
+    name: name || 'Anonymous',
+    contact: document.getElementById('f-contact').value.trim(),
+    area,
+    category: aiResult.category || category || 'other',
+    subject,
+    description,
+    severity: aiResult.severity || selectedSeverity || 'medium',
+    status: 'new',
+    submittedAt: new Date().toISOString(),
+    aiAnalysis: aiResult,
+    timeline: [
+      { event: 'Submitted', time: new Date().toISOString(), icon: '📥', color: 'rgba(0,212,168,.15)' },
+      { event: 'AI Analysis Complete', time: new Date().toISOString(), icon: '🤖', color: 'rgba(14,165,233,.15)' },
+      { event: 'Routed to Department', time: new Date().toISOString(), icon: '📨', color: 'rgba(167,139,250,.15)' },
+    ]
+  };
+
+  complaints.push(record);
+  await saveComplaints(complaints);
+
+  // Show success
+  proc.classList.remove('show');
+  const sc = document.getElementById('successCard');
+  sc.classList.add('show');
+  document.getElementById('successId').textContent = `TICKET #${ticketId}`;
+  document.getElementById('aiOutcomeText').innerHTML = formatAIOutcome(aiResult);
+  renderOutcomeTags(aiResult, record);
+
+  btn.disabled = false;
+  refreshAll();
+  showToast('✅', `Ticket ${ticketId} created & AI analysis complete!`);
+
+  // Auto-fill track
+  document.getElementById('trackInput').value = ticketId;
+}
+
+async function animateSteps() {
+  for(let i=0;i<6;i++) {
+    const el = document.getElementById('step'+i);
+    el.className = 'step-ic step-running';
+    el.textContent = '↻';
+    await sleep(500 + Math.random()*400);
+    el.className = 'step-ic step-done';
+    el.textContent = '✓';
+  }
+}
+
+function sleep(ms) { return new Promise(r=>setTimeout(r,ms)); }
+
+// ══════════════════════════════════════════════
+//  AI ANALYSIS VIA ANTHROPIC API
+// ══════════════════════════════════════════════
+async function analyzeWithAI(subject, description, category, severity, type, area) {
+  const prompt = `You are an AI civic intelligence system. Analyze this community ${type} and return a JSON object only (no markdown, no explanation).
+
+Subject: "${subject}"
+Description: "${description}"
+Category: "${category || 'unknown'}"
+Reported Severity: "${severity || 'unknown'}"
+Area: "${area}"
+Type: "${type}"
+
+Return ONLY valid JSON with these exact keys:
+{
+  "category": "one of: infrastructure|environment|health|water|electricity|social|governance|other",
+  "severity": "one of: low|medium|high|critical",
+  "priority_score": number 1-10,
+  "department": "which government department should handle this",
+  "summary": "2-sentence professional summary of the issue",
+  "root_cause": "likely root cause in 1 sentence",
+  "recommended_action": "specific actionable recommendation in 2 sentences",
+  "estimated_resolution": "e.g. 3-5 working days",
+  "similar_issues_likely": true or false,
+  "public_impact": "low|medium|high",
+  "keywords": ["array","of","5","key","terms"],
+  "urgency_reason": "one sentence why this needs attention at this priority level"
+}`;
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+    const data = await response.json();
+    const text = data.content?.map(c=>c.text||'').join('').trim();
+    const clean = text.replace(/```json|```/g,'').trim();
+    return JSON.parse(clean);
+  } catch(e) {
+    // Fallback
+    return {
+      category: category || 'other',
+      severity: severity || 'medium',
+      priority_score: 5,
+      department: 'Municipal Corporation',
+      summary: `A community ${type} has been filed regarding: ${subject}.`,
+      root_cause: 'Requires investigation by the relevant department.',
+      recommended_action: 'Forward to the appropriate municipal department for assessment and action.',
+      estimated_resolution: '5-7 working days',
+      similar_issues_likely: false,
+      public_impact: 'medium',
+      keywords: [subject.split(' ')[0]||'civic'],
+      urgency_reason: 'Standard municipal issue requiring departmental attention.'
+    };
+  }
+}
+
+function formatAIOutcome(r) {
+  return `<strong>Summary:</strong> ${r.summary}<br><br>
+<strong>Root Cause:</strong> ${r.root_cause}<br><br>
+<strong>Recommended Action:</strong> ${r.recommended_action}<br><br>
+<strong>Estimated Resolution:</strong> ${r.estimated_resolution} &nbsp;·&nbsp; <strong>Priority Score:</strong> ${r.priority_score}/10`;
+}
+
+function renderOutcomeTags(r, record) {
+  const wrap = document.getElementById('outcomeTags');
+  wrap.innerHTML = `
+    <span class="ot ot-cat">${r.category||record.category}</span>
+    <span class="ot ot-sev">Severity: ${r.severity||record.severity}</span>
+    <span class="ot ot-dept">${r.department}</span>
+    <span class="ot ot-pri">Impact: ${r.public_impact}</span>
+    ${(r.keywords||[]).map(k=>`<span class="ot" style="background:rgba(255,255,255,.05);color:var(--text3);">${k}</span>`).join('')}
+  `;
+}
+
+// ══════════════════════════════════════════════
+//  RENDER FUNCTIONS
+// ══════════════════════════════════════════════
+function refreshAll() {
+  const n = complaints.length;
+  document.getElementById('issueCount').textContent = n;
+  renderDashboard();
+  renderAllIssues();
+  renderMyIssues();
+}
+
+function renderDashboard() {
+  const total = complaints.length;
+  const pending = complaints.filter(c=>c.status==='new'||c.status==='review').length;
+  const critical = complaints.filter(c=>c.severity==='critical').length;
+  const resolved = complaints.filter(c=>c.status==='resolved').length;
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statPending').textContent = pending;
+  document.getElementById('statCritical').textContent = critical;
+  document.getElementById('statResolved').textContent = resolved;
+  document.getElementById('recentCount').textContent = total + ' total';
+
+  // Recent list
+  const recentList = document.getElementById('recentList');
+  if(!total) {
+    recentList.innerHTML = `<div class="empty-state"><div class="es-icon">📭</div><div class="es-title">No submissions yet</div><div class="es-body">Be the first to report a community issue.</div></div>`;
+  } else {
+    const recent = [...complaints].reverse().slice(0,6);
+    recentList.innerHTML = recent.map((c,i) => renderComplaintRow(c, i+1)).join('');
+  }
+
+  // Category chart
+  renderCategoryChart('categoryChart');
+  renderAreaChart('areaChart');
+
+  // AI insight
+  if(total >= 2) {
+    const ins = document.getElementById('dashInsightCard');
+    ins.style.display = 'block';
+    generateDashInsight();
+  }
+}
+
+function renderComplaintRow(c, rank) {
+  const catClass = 'ctag-'+(c.category||'other');
+  const sevClass = 'sd-'+(c.severity||'medium');
+  const pillClass = 'pill-'+(c.status||'new');
+  const pillTxt = {new:'NEW',review:'REVIEW',action:'IN ACTION',resolved:'RESOLVED'}[c.status]||'NEW';
+  const timeAgo = timeSince(c.submittedAt);
+  return `<div class="cl-item" onclick="quickView('${c.id}')">
+    <div class="cl-rank">#${rank}</div>
+    <div class="cl-body">
+      <div class="cl-title">${escHtml(c.subject)}</div>
+      <div class="cl-meta">
+        <span class="ctag ${catClass}">${c.category||'other'}</span>
+        <span class="cl-loc">📍 ${escHtml(c.area)}</span>
+        <span class="cl-time">${timeAgo}</span>
+      </div>
+    </div>
+    <div class="cl-right">
+      <span class="pill ${pillClass}">${pillTxt}</span>
+      <div class="sev-dot ${sevClass}" title="Severity: ${c.severity}"></div>
+    </div>
+  </div>`;
+}
+
+function renderCategoryChart(id) {
+  const el = document.getElementById(id);
+  if(!complaints.length) {
+    el.innerHTML = `<div class="empty-state" style="padding:32px 16px;"><div class="es-icon">📊</div><div class="es-title">No data yet</div></div>`;
+    return;
+  }
+  const cats = {};
+  complaints.forEach(c=>{ cats[c.category||'other']=(cats[c.category||'other']||0)+1; });
+  const sorted = Object.entries(cats).sort((a,b)=>b[1]-a[1]);
+  const max = sorted[0][1];
+  const colors = {infrastructure:'var(--accent2)',environment:'var(--accent)',health:'var(--warn)',water:'#60a5fa',electricity:'#fbbf24',social:'var(--purple)',governance:'#f9a8d4',other:'var(--text3)'};
+  el.innerHTML = `<div class="bar-chart">${sorted.map(([cat,count])=>`
+    <div class="bc-row">
+      <div class="bc-label">${cat}</div>
+      <div class="bc-bar-wrap"><div class="bc-bar" style="width:${(count/max)*100}%;background:${colors[cat]||'var(--text3)'};"></div></div>
+      <div class="bc-val">${count}</div>
+    </div>`).join('')}</div>`;
+}
+
+function renderAreaChart(id) {
+  const el = document.getElementById(id);
+  if(!complaints.length) {
+    el.innerHTML = `<div class="empty-state" style="padding:24px 16px;"><div class="es-icon">🗺️</div><div class="es-title">No area data</div></div>`;
+    return;
+  }
+  const areas = {};
+  complaints.forEach(c=>{ const a=c.area||'Unknown'; areas[a]=(areas[a]||0)+1; });
+  const sorted = Object.entries(areas).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const max = sorted[0][1];
+  el.innerHTML = `<div class="bar-chart">${sorted.map(([area,count])=>`
+    <div class="bc-row">
+      <div class="bc-label">📍 ${escHtml(area)}</div>
+      <div class="bc-bar-wrap"><div class="bc-bar" style="width:${(count/max)*100}%;background:var(--accent);opacity:.7;"></div></div>
+      <div class="bc-val">${count}</div>
+    </div>`).join('')}</div>`;
+}
+
+async function generateDashInsight() {
+  const el = document.getElementById('dashInsightText');
+  const cats = {};
+  const areas = {};
+  complaints.forEach(c=>{
+    cats[c.category||'other']=(cats[c.category||'other']||0)+1;
+    areas[c.area||'Unknown']=(areas[c.area||'Unknown']||0)+1;
+  });
+  const topCat = Object.entries(cats).sort((a,b)=>b[1]-a[1])[0];
+  const topArea = Object.entries(areas).sort((a,b)=>b[1]-a[1])[0];
+  const critical = complaints.filter(c=>c.severity==='critical').length;
+  el.innerHTML = `<div class="ib-header">🤖 AI INSIGHT</div>
+    <div class="ib-text">Based on <strong>${complaints.length} submissions</strong>, the top issue category is <strong>${topCat?.[0]||'N/A'}</strong> (${topCat?.[1]||0} reports) and the most affected area is <strong>${topArea?.[0]||'N/A'}</strong>. 
+    ${critical>0?`<strong>${critical} critical issue(s)</strong> require immediate departmental attention.`:''} 
+    AI analysis suggests prioritizing targeted interventions in high-frequency complaint zones to maximize community impact.</div>`;
+}
+
+function renderAllIssues() {
+  const list = document.getElementById('allIssuesList');
+  const meta = document.getElementById('allIssuesMeta');
+  if(!complaints.length) {
+    list.innerHTML = `<div class="empty-state"><div class="es-icon">📭</div><div class="es-title">No submissions yet</div></div>`;
+    meta.textContent = '0 records';
+    return;
+  }
+  meta.textContent = complaints.length + ' records';
+  const sorted = [...complaints].reverse();
+  list.innerHTML = sorted.map((c,i)=>renderComplaintRow(c, i+1)).join('');
+}
+
+function filterIssues() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const sev = document.getElementById('filterSev').value;
+  const cat = document.getElementById('filterCat').value;
+  const list = document.getElementById('allIssuesList');
+  let filtered = complaints.filter(c => {
+    const matchQ = !q || c.subject.toLowerCase().includes(q) || c.description.toLowerCase().includes(q) || c.area.toLowerCase().includes(q) || (c.category||'').includes(q);
+    const matchS = !sev || c.severity===sev;
+    const matchC = !cat || c.category===cat;
+    return matchQ && matchS && matchC;
+  }).reverse();
+  if(!filtered.length) {
+    list.innerHTML = `<div class="empty-state"><div class="es-icon">🔍</div><div class="es-title">No matching issues</div><div class="es-body">Try adjusting your filters.</div></div>`;
+    return;
+  }
+  list.innerHTML = filtered.map((c,i)=>renderComplaintRow(c,i+1)).join('');
+}
+
+function renderMyIssues() {
+  const el = document.getElementById('myIssuesList');
+  if(!complaints.length) {
+    el.innerHTML = `<div class="empty-state"><div class="es-icon">📭</div><div class="es-title">No submissions found</div></div>`;
+    return;
+  }
+  const recent = [...complaints].reverse().slice(0,5);
+  el.innerHTML = recent.map((c,i)=>renderComplaintRow(c,i+1)).join('');
+}
+
+function trackIssue() {
+  const id = document.getElementById('trackInput').value.trim().toUpperCase();
+  const detail = document.getElementById('trackDetail');
+  const found = complaints.find(c=>c.id===id);
+  if(!found) {
+    detail.innerHTML = `<div style="padding:24px;text-align:center;color:var(--danger);font-size:13.5px;">❌ Ticket "${id}" not found. Please check the ID and try again.</div>`;
+    detail.classList.add('show');
+    return;
+  }
+  detail.innerHTML = renderDetailView(found);
+  detail.classList.add('show');
+}
+
+function quickView(id) {
+  showView('track');
+  document.getElementById('trackInput').value = id;
+  trackIssue();
+}
+
+function renderDetailView(c) {
+  const ai = c.aiAnalysis || {};
+  const statusColor = {new:'rgba(244,63,94,.15)',review:'rgba(245,158,11,.15)',action:'rgba(0,212,168,.15)',resolved:'rgba(52,211,153,.15)'}[c.status]||'rgba(0,212,168,.15)';
+  const statusEmoji = {new:'📥',review:'🔍',action:'⚙️',resolved:'✅'}[c.status]||'📥';
+  const tlHtml = (c.timeline||[]).map(t=>`
+    <div class="tl-item">
+      <div class="tl-dot" style="background:${t.color||'rgba(0,212,168,.15)'}">${t.icon||'•'}</div>
+      <div class="tl-content">
+        <div class="tl-title">${t.event}</div>
+        <div class="tl-time">${new Date(t.time).toLocaleString()}</div>
+      </div>
+    </div>`).join('');
+
+  return `<div class="cd-header">
+    <div class="cd-status-circle" style="background:${statusColor}">${statusEmoji}</div>
+    <div style="flex:1;">
+      <div class="cd-title">${escHtml(c.subject)}</div>
+      <div class="cd-id">${c.id} · Submitted ${timeSince(c.submittedAt)}</div>
+      <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
+        <span class="pill pill-${c.status||'new'}">${{new:'NEW',review:'REVIEW',action:'IN ACTION',resolved:'RESOLVED'}[c.status]||'NEW'}</span>
+        <span class="ctag ctag-${c.category||'other'}">${c.category||'other'}</span>
+        <span class="ot ot-sev" style="font-size:10px;padding:2px 8px;border-radius:10px;">Severity: ${c.severity||'medium'}</span>
+        ${ai.priority_score?`<span style="font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,.05);color:var(--text3);">Priority: ${ai.priority_score}/10</span>`:''}
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+      <select onchange="updateStatus('${c.id}',this.value)" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;cursor:pointer;">
+        <option value="new" ${c.status==='new'?'selected':''}>New</option>
+        <option value="review" ${c.status==='review'?'selected':''}>Under Review</option>
+        <option value="action" ${c.status==='action'?'selected':''}>In Action</option>
+        <option value="resolved" ${c.status==='resolved'?'selected':''}>Resolved</option>
+      </select>
+    </div>
+  </div>
+  <div class="cd-body">
+    <div class="cd-field"><div class="cd-field-label">Description</div><div class="cd-field-val">${escHtml(c.description)}</div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="cd-field"><div class="cd-field-label">Submitted By</div><div class="cd-field-val">${escHtml(c.name||'Anonymous')}</div></div>
+      <div class="cd-field"><div class="cd-field-label">Area</div><div class="cd-field-val">📍 ${escHtml(c.area)}</div></div>
+      <div class="cd-field"><div class="cd-field-label">Type</div><div class="cd-field-val">${c.type||'complaint'}</div></div>
+      <div class="cd-field"><div class="cd-field-label">Department</div><div class="cd-field-val">${ai.department||'—'}</div></div>
+    </div>
+    ${ai.summary?`<div class="insight-box" style="margin:0;">
+      <div class="ib-header">🤖 AI ANALYSIS</div>
+      <div class="ib-text">
+        <strong>Summary:</strong> ${ai.summary}<br><br>
+        ${ai.root_cause?`<strong>Root Cause:</strong> ${ai.root_cause}<br><br>`:''}
+        ${ai.recommended_action?`<strong>Recommended Action:</strong> ${ai.recommended_action}<br><br>`:''}
+        ${ai.estimated_resolution?`<strong>Est. Resolution:</strong> ${ai.estimated_resolution} · <strong>Public Impact:</strong> ${ai.public_impact||'medium'}`:''}
+        ${ai.urgency_reason?`<br><br><strong>Urgency Note:</strong> ${ai.urgency_reason}`:''}
+      </div>
+      ${ai.keywords?`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;">${ai.keywords.map(k=>`<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(255,255,255,.05);color:var(--text3);font-family:'JetBrains Mono',monospace;">${k}</span>`).join('')}</div>`:''}
+    </div>`:''}
+    <div class="cd-field">
+      <div class="cd-field-label">Timeline</div>
+      <div class="timeline">${tlHtml}</div>
+    </div>
+  </div>`;
+}
+
+async function updateStatus(id, newStatus) {
+  complaints = complaints.map(c=>{
+    if(c.id===id) {
+      c.status = newStatus;
+      c.timeline = c.timeline||[];
+      const msgs = {review:'Moved to Under Review',action:'Action Initiated',resolved:'Issue Resolved & Closed'};
+      if(msgs[newStatus]) c.timeline.push({event:msgs[newStatus],time:new Date().toISOString(),icon:{review:'🔍',action:'⚙️',resolved:'✅'}[newStatus],color:{review:'rgba(245,158,11,.15)',action:'rgba(14,165,233,.15)',resolved:'rgba(52,211,153,.15)'}[newStatus]});
+    }
+    return c;
+  });
+  await saveComplaints(complaints);
+  refreshAll();
+  trackIssue();
+  showToast('📋', `Status updated to "${newStatus}"`);
+}
+
+function renderInsights() {
+  const el = document.getElementById('insightsContent');
+  if(complaints.length < 3) {
+    el.innerHTML = `<div class="empty-state"><div class="es-icon">🧠</div><div class="es-title">Need at least 3 submissions</div><div class="es-body">Submit more issues to generate detailed AI insights.</div></div>`;
+    return;
+  }
+  const cats = {}, areas = {}, sevs = {};
+  complaints.forEach(c=>{
+    cats[c.category||'other']=(cats[c.category||'other']||0)+1;
+    areas[c.area||'Unknown']=(areas[c.area||'Unknown']||0)+1;
+    sevs[c.severity||'medium']=(sevs[c.severity||'medium']||0)+1;
+  });
+  const topCat = Object.entries(cats).sort((a,b)=>b[1]-a[1]);
+  const topArea = Object.entries(areas).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+  el.innerHTML = `
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">Category Distribution</div>
+      <div class="bar-chart">${topCat.map(([cat,count])=>`
+        <div class="bc-row">
+          <div class="bc-label">${cat}</div>
+          <div class="bc-bar-wrap"><div class="bc-bar" style="width:${(count/topCat[0][1])*100}%;background:var(--accent2);"></div></div>
+          <div class="bc-val">${count}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">Severity Breakdown</div>
+      ${Object.entries(sevs).map(([sev,count])=>`
+        <div class="bc-row" style="margin-bottom:10px;">
+          <div class="bc-label" style="text-transform:capitalize;">${sev}</div>
+          <div class="bc-bar-wrap"><div class="bc-bar" style="width:${(count/complaints.length)*100}%;background:${{critical:'var(--danger)',high:'var(--warn)',medium:'var(--accent2)',low:'var(--green)'}[sev]||'var(--text3)'};"></div></div>
+          <div class="bc-val">${count}</div>
+        </div>`).join('')}
+      <div style="margin-top:16px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">Top Affected Areas</div>
+      ${topArea.map(([area,count])=>`
+        <div class="bc-row" style="margin-bottom:8px;">
+          <div class="bc-label">📍 ${escHtml(area)}</div>
+          <div class="bc-bar-wrap"><div class="bc-bar" style="width:${(count/topArea[0][1])*100}%;background:var(--purple);opacity:.8;"></div></div>
+          <div class="bc-val">${count}</div>
+        </div>`).join('')}
+    </div>
+  </div>
+  <div style="margin-top:20px;" class="insight-box">
+    <div class="ib-header">🤖 AI INTELLIGENCE SUMMARY</div>
+    <div class="ib-text">
+      Out of <strong>${complaints.length} total submissions</strong>, the dominant issue category is <strong>${topCat[0]?.[0]||'—'}</strong> (${Math.round((topCat[0]?.[1]||0)/complaints.length*100)}% of all reports). 
+      The area with the highest complaint density is <strong>${topArea[0]?.[0]||'—'}</strong>. 
+      ${sevs.critical?`<strong>${sevs.critical} critical issue(s)</strong> require emergency departmental intervention.`:''} 
+      AI-driven resource allocation recommendation: prioritize <strong>${topCat[0]?.[0]||'civic'}</strong> interventions in <strong>${topArea[0]?.[0]||'the top area'}</strong> for maximum community impact.
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════
+//  UTILITIES
+// ══════════════════════════════════════════════
+function resetForm() {
+  ['f-name','f-contact','f-area','f-subject','f-description'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('f-category').value='';
+  document.getElementById('f-count').textContent='0';
+  selectedSeverity='';
+  document.querySelectorAll('.sev-opt').forEach(o=>o.classList.remove('selected'));
+  document.getElementById('successCard').classList.remove('show');
+  document.getElementById('aiProcessing').classList.remove('show');
+  document.querySelectorAll('#aiSteps .step-ic').forEach((el,i)=>{
+    el.className='step-ic step-pending'; el.textContent='○';
+  });
+}
+
+function escHtml(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function timeSince(iso) {
+  const secs = Math.floor((Date.now()-new Date(iso))/1000);
+  if(secs<60) return secs+'s ago';
+  if(secs<3600) return Math.floor(secs/60)+'m ago';
+  if(secs<86400) return Math.floor(secs/3600)+'h ago';
+  return Math.floor(secs/86400)+'d ago';
+}
+
+let toastTimer;
+function showToast(icon, msg) {
+  const t=document.getElementById('toast');
+  document.getElementById('toastIc').textContent=icon;
+  document.getElementById('toastMsg').textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3500);
+}
+</script>
+</body>
+</html>
